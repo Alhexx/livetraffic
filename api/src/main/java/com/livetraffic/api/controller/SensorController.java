@@ -9,23 +9,23 @@ import org.springframework.http.MediaType;
 
 import reactor.core.publisher.Flux;
 
-//import com.livetraffic.api.services.SensorService;
+import com.livetraffic.api.service.SensorService;
 
 @RestController
 @RequestMapping("/sensors")
 public class SensorController {
 
-	//@Autowired
-	//private SensorService service;
+	@Autowired
+	private SensorService service;
 
 	@GetMapping
 	public Flux<String> getAll() {
-		return null;
+		return service.getAll();
 	}
 
 	@GetMapping(path = "/events", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-	public Flux<String> subscribe() {
-		return null;
+	public Flux<String> subscribeAll() {
+		return service.subscribeAll();
 	}
 
 }

@@ -11,9 +11,9 @@ public class WebClientConfig {
 
 	@Autowired
 	@Bean
-	public WebClient webClient(@Value("${webservice.orion.baseurl}") String baseURL) {
+	public WebClient orionClient(@Value("${webservice.orion.baseurl}") String baseURL) {
 		return WebClient.builder()
-			.baseUrl(baseURL)
+			.baseUrl(baseURL + "/v2/")
 			.build();
 	}
 
