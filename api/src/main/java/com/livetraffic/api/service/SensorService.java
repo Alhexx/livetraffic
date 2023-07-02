@@ -2,6 +2,7 @@ package com.livetraffic.api.service;
 
 import java.util.function.Consumer;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +22,8 @@ public class SensorService {
 	@Autowired
 	private WebClient orionClient;
 
+	private AtomicReference<String> globalSubscriptionId = new AtomicReference<>("");
 	private SensorSink sensorSink = new SensorSink();
-	private String globalSubscription = null;
 	private Flux<String> sensorStream = Flux.create(sensorSink).share();
 
 	public Flux<String> getAll() {
@@ -33,7 +34,6 @@ public class SensorService {
 	}
 
 	public Mono<Void> create(String sensor) {
-		for (int i = 0; i < 10; i++) System.out.println(sensor);
 		return orionClient.post()
 			.uri("/entities")
 			.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -44,7 +44,6 @@ public class SensorService {
 	}
 
 	public Mono<Void> update(String id, String attrs) {
-		for (int i = 0; i < 10; i++) System.out.println(attrs);
 		return orionClient.post()
 			.uri("/entities/" + id + "/attrs")
 			.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -55,7 +54,8 @@ public class SensorService {
 	}
 
 	public Flux<String> subscribeAll() {
-		if (globalSubscription == null) {
+		String id = globalSubscriptionId.get();
+		if (id == "" || id == null) {
 			orionClient.post()
 				.uri("/subscriptions")
 				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -63,9 +63,7 @@ public class SensorService {
 				.retrieve()
 				.toBodilessEntity()
 				.subscribe();
-			globalSubscription = "";
-			System.out.println(subscriptionStr());
-			System.out.println(globalSubscription);
+			globalSubscriptionId.set("asdf");
 		}
 		return sensorStream;
 	}
