@@ -1,18 +1,10 @@
 import Router from "next/router";
 import Image from "next/image";
-import { useEffect, useState } from "react";
 import Container from "react-bootstrap/Container";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 
 export function Menu() {
-  // const [isLoading, setIsLoading] = useState(false);
-  // const [logado, setLogado] = useState(false);
-
-  // useEffect(() => {
-  //   setLogado(localStorage.getItem("id") != null ? true : false);
-  // }, []);
-
   return (
     <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark">
       <Container>
