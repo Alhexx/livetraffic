@@ -2,9 +2,10 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import styles from "./style.module.scss";
 import api from "../../services/api";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { ListGroup, Offcanvas, Button } from "react-bootstrap";
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
+import { backend_url } from "../../../utils/conf";
 
 export default function Map() {
   const [isLoading, setIsLoading] = useState(false);
@@ -13,7 +14,18 @@ export default function Map() {
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
-  const [sensores, setSensores] = useState([]);
+  const [sensors, setSensors] = useState([]);
+
+  const mapRef = useRef();
+
+  const showMyLocation = () => {
+    const map = mapRef.current;
+    if (map) {
+      map.flyTo([-5.823095781592032, -35.20495616441758], 18, {
+        animate: true,
+      });
+    }
+  };
 
   const markerRed = new L.Icon({
     iconUrl: "/pin.png",
@@ -46,9 +58,8 @@ export default function Map() {
         status: item.flow.value,
         id: item.id,
       }));
-      console.log(dados);
 
-      setSensores(dados);
+      setSensors(dados);
 
       setIsLoading(false);
     } catch (e) {
@@ -61,11 +72,39 @@ export default function Map() {
     getData();
   }, []);
 
+  useEffect(() => {
+    const source = new EventSource(backend_url + "/sensors/events");
+
+    source.addEventListener("message", (e) => {
+      const data = JSON.parse(e.data);
+      const updatedArray = data.data.map((item) => ({
+        coordinates: item.location.value.coordinates,
+        latitude: item.location.value.coordinates[0],
+        longitude: item.location.value.coordinates[1],
+        status: item.flow.value,
+        id: item.id,
+      }));
+
+      setSensors((sensors) =>
+        sensors.map((sensor) => {
+          const updated = updatedArray.find(
+            (updated) => updated.id === sensor.id
+          );
+          return updated ? { ...sensor, ...updated } : sensor;
+        })
+      );
+    });
+  }, []);
+
   return (
     <div className={styles.container}>
       <div className={styles.contact}>
         <div id="contact-form-overlay-mini">
-          <Button variant="dark" onClick={handleShow}>
+          <Button
+            variant="dark"
+            // onClick={handleShow}
+            onClick={showMyLocation}
+          >
             Sensors
           </Button>
 
@@ -78,15 +117,9 @@ export default function Map() {
                 Sensors
               </Button>
               <ListGroup>
-                <ListGroup.Item action onClick={console.log("FOI")}>
-                  SENSOR 1
-                </ListGroup.Item>
-                <ListGroup.Item action onClick={console.log("FOI")}>
-                  SENSOR 2
-                </ListGroup.Item>
-                <ListGroup.Item action onClick={console.log("FOI")}>
-                  SENSOR 3
-                </ListGroup.Item>
+                <ListGroup.Item action>SENSOR 1</ListGroup.Item>
+                <ListGroup.Item action>SENSOR 2</ListGroup.Item>
+                <ListGroup.Item action>SENSOR 3</ListGroup.Item>
               </ListGroup>
             </Offcanvas.Body>
           </Offcanvas>
@@ -96,13 +129,15 @@ export default function Map() {
         center={[-5.832430084556201, -35.205416846609594]}
         zoom={15}
         style={{ height: "77vh", width: "100%" }}
+        ref={mapRef}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        {sensores.map((sensor, i) => (
+        {sensors.map((sensor, i) => (
           <Marker
+            key={i}
             position={sensor.coordinates}
             icon={
               sensor.status == "free"
