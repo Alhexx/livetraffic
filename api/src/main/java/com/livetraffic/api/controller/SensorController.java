@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
 
@@ -33,19 +33,19 @@ public class SensorController {
 		return service.subscribeAll();
 	}
 
-	@PostMapping
+	@PostMapping("/events")
 	public Mono<Void> publishUpdate(HttpEntity<String> httpEntity) {
-		return service.publish(httpEntity.getBody());
+		return service.publishOne(httpEntity.getBody());
 	}
 
-//	@PutMapping
-//	public Mono<Void> publishUpdate2(HttpEntity<String> httpEntity) {
-//		return service.publish(httpEntity.getBody());
-//	}
-//
-//	@PatchMapping
-//	public Mono<Void> publishUpdate3(HttpEntity<String> httpEntity) {
-//		return service.publish(httpEntity.getBody());
-//	}
+	@PostMapping
+	public Mono<Void> register(HttpEntity<String> httpEntity) {
+		return service.create(httpEntity.getBody());
+	}
+
+	@PatchMapping("/{id}")
+	public Mono<Void> update(HttpEntity<String> httpEntity, @PathVariable String id) {
+		return service.update(id, httpEntity.getBody());
+	}
 
 }

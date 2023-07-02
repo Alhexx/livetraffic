@@ -32,9 +32,26 @@ public class SensorService {
 			.bodyToFlux(String.class);
 	}
 
-	//TODO
-	public Flux<String> create() {
-		return null;
+	public Mono<Void> create(String sensor) {
+		for (int i = 0; i < 10; i++) System.out.println(sensor);
+		return orionClient.post()
+			.uri("/entities")
+			.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+			.body(Mono.just(sensor), String.class)
+			.retrieve()
+			.toBodilessEntity()
+			.then(Mono.empty());
+	}
+
+	public Mono<Void> update(String id, String attrs) {
+		for (int i = 0; i < 10; i++) System.out.println(attrs);
+		return orionClient.post()
+			.uri("/entities/" + id + "/attrs")
+			.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+			.body(Mono.just(attrs), String.class)
+			.retrieve()
+			.toBodilessEntity()
+			.then(Mono.empty());
 	}
 
 	public Flux<String> subscribeAll() {
@@ -43,12 +60,8 @@ public class SensorService {
 				.uri("/subscriptions")
 				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
 				.body(Mono.just(this.subscriptionStr()), String.class)
-				//.body(BodyInserters.fromValue(this.subscriptionStr()))
-				//.bodyValue(this.subscriptionStr())
 				.retrieve()
 				.toBodilessEntity()
-				//.bodyToMono(String.class)
-				//.doOnNext(s -> globalSubscription = s)
 				.subscribe();
 			globalSubscription = "";
 			System.out.println(subscriptionStr());
@@ -57,7 +70,7 @@ public class SensorService {
 		return sensorStream;
 	}
 
-	public Mono<Void> publish(String sensor) {
+	public Mono<Void> publishOne(String sensor) {
 		sensorSink.produce(sensor);
 		System.out.println(sensor);
 		return Mono.empty();
@@ -75,7 +88,7 @@ public class SensorService {
 	}
 
 	private String subscriptionStr() {
-		return "{\"description\":\"Global TrafficSensor subscription\",\"subject\":{\"entities\":[{\"idPattern\":\".*\",\"type\":\"TrafficSensor\"}],\"condition\":{\"attrs\":[\"flow\",\"location\"]}},\"notification\":{\"http\":{\"url\":\"http://api:8080/sensors\"},\"attrs\":[]},\"throttling\":2}";
+		return "{\"description\":\"Global TrafficSensor subscription\",\"subject\":{\"entities\":[{\"idPattern\":\".*\",\"type\":\"TrafficSensor\"}],\"condition\":{\"attrs\":[\"flow\",\"location\"]}},\"notification\":{\"http\":{\"url\":\"http://api:8080/sensors/events\"},\"attrs\":[]},\"throttling\":2}";
 	}
 
 }
