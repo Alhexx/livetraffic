@@ -40,6 +40,7 @@ export default function Map() {
       const res = await api.get("/sensors");
 
       const dados = res.data.map((item) => ({
+        coordinates: item.location.value.coordinates,
         latitude: item.location.value.coordinates[0],
         longitude: item.location.value.coordinates[1],
         status: item.flow.value,
@@ -64,15 +65,18 @@ export default function Map() {
     <div className={styles.container}>
       <div className={styles.contact}>
         <div id="contact-form-overlay-mini">
-          <Button variant="primary" onClick={handleShow}>
-            Sensores
+          <Button variant="dark" onClick={handleShow}>
+            Sensors
           </Button>
 
           <Offcanvas show={show} onHide={handleClose} placement="end">
             <Offcanvas.Header closeButton>
-              <Offcanvas.Title>Sensores</Offcanvas.Title>
+              <Offcanvas.Title>List</Offcanvas.Title>
             </Offcanvas.Header>
             <Offcanvas.Body>
+              <Button variant="dark" onClick={handleShow}>
+                Sensors
+              </Button>
               <ListGroup>
                 <ListGroup.Item action onClick={console.log("FOI")}>
                   SENSOR 1
@@ -99,7 +103,7 @@ export default function Map() {
         />
         {sensores.map((sensor, i) => (
           <Marker
-            position={[sensor.latitude, sensor.longitude]}
+            position={sensor.coordinates}
             icon={
               sensor.status == "free"
                 ? markerGreen

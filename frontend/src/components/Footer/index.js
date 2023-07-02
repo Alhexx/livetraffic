@@ -7,11 +7,11 @@ export function Footer() {
       <div id="copyrights" className={styles.footer}>
         <Container>
           <div className={styles.copyright}>
-            Copyrights &copy; 2023 All Rights Reserved by SAT.
+            Copyrights &copy; 2023 All Rights Reserved by Joe's Traffic.
             <br />
           </div>
           <div className={styles.info}>
-            dev@sat.com <span className="middot">&middot;</span> +55 (84)
+            dev@joe.com <span className="middot">&middot;</span> +55 (84)
             9999-9999
           </div>
         </Container>

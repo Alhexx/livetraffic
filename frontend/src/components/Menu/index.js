@@ -17,15 +17,12 @@ export function Menu() {
           ></Image>
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="responsive-navbar-nav" />
+
         <Navbar.Collapse id="responsive-navbar-nav">
           <Nav className="me-auto"></Nav>
+
           <Nav>
-            <Nav.Link onClick={() => Router.push("/login")} as="a">
-              Login
-            </Nav.Link>
-            <Nav.Link onClick={() => Router.push("/register")} as="a">
-              Registrar-se
-            </Nav.Link>
+            <h4 style={{ color: "wheat" }}>Joe's Traffic</h4>
           </Nav>
         </Navbar.Collapse>
       </Container>
