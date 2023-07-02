@@ -24,5 +24,10 @@ services:
       - "1026:1026"
     command: -dbhost mongodb
 
+  api:
+    build: ./api
+    ports:
+      - "8080:8080"
+
 volumes:
   mongodb-volume:
