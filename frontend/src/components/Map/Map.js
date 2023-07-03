@@ -3,13 +3,15 @@ import L from "leaflet";
 import styles from "./style.module.scss";
 import api from "../../services/api";
 import React, { useEffect, useState, useRef } from "react";
-import { ListGroup, Offcanvas, Button } from "react-bootstrap";
+import { ListGroup, Offcanvas, Button, Col, Row } from "react-bootstrap";
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import { backend_url } from "../../../utils/conf";
+import ModalSensor from "../ModalSensor";
 
 export default function Map() {
   const [isLoading, setIsLoading] = useState(false);
   const [show, setShow] = useState(false);
+  const [modalSensor, setModalSensor] = useState(false);
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
@@ -18,12 +20,14 @@ export default function Map() {
 
   const mapRef = useRef();
 
-  const showMyLocation = () => {
+  const showMyLocation = (lat, long) => {
     const map = mapRef.current;
     if (map) {
-      map.flyTo([-5.823095781592032, -35.20495616441758], 18, {
+      map.flyTo([lat, long], 18, {
         animate: true,
+        duration: 0.5,
       });
+      setShow(false);
     }
   };
 
@@ -68,6 +72,20 @@ export default function Map() {
     }
   }
 
+  async function changeStatus(status, id) {
+    try {
+      setIsLoading(true);
+      const updateStatus = {
+        flow: { value: status },
+      };
+
+      await api.patch("/sensors/" + id, updateStatus);
+    } catch (e) {
+      console.log("Erro!!!");
+      setIsLoading(false);
+    }
+  }
+
   useEffect(() => {
     getData();
   }, []);
@@ -85,14 +103,20 @@ export default function Map() {
         id: item.id,
       }));
 
-      setSensors((sensors) =>
-        sensors.map((sensor) => {
+      setSensors((sensors) => {
+        const updatedSensors = sensors.map((sensor) => {
           const updated = updatedArray.find(
             (updated) => updated.id === sensor.id
           );
           return updated ? { ...sensor, ...updated } : sensor;
-        })
-      );
+        });
+
+        const newSensors = updatedArray.filter(
+          (updated) => !sensors.find((sensor) => sensor.id === updated.id)
+        );
+
+        return [...updatedSensors, ...newSensors];
+      });
     });
   }, []);
 
@@ -100,26 +124,103 @@ export default function Map() {
     <div className={styles.container}>
       <div className={styles.contact}>
         <div id="contact-form-overlay-mini">
-          <Button
-            variant="dark"
-            // onClick={handleShow}
-            onClick={showMyLocation}
-          >
+          <Button variant="dark" onClick={handleShow}>
             Sensors
           </Button>
-
           <Offcanvas show={show} onHide={handleClose} placement="end">
             <Offcanvas.Header closeButton>
-              <Offcanvas.Title>List</Offcanvas.Title>
+              <Offcanvas.Title>Sensors</Offcanvas.Title>
             </Offcanvas.Header>
             <Offcanvas.Body>
-              <Button variant="dark" onClick={handleShow}>
-                Sensors
-              </Button>
+              <Row>
+                <Col md={9}>Manage Sensors</Col>
+                <Col
+                  md={1}
+                  style={{
+                    marginLeft: "15px",
+                    marginBottom: "3px",
+                  }}
+                >
+                  <Button
+                    variant="primary"
+                    onClick={() => {
+                      setModalSensor(true);
+                    }}
+                  >
+                    Add
+                  </Button>
+                </Col>
+              </Row>
               <ListGroup>
-                <ListGroup.Item action>SENSOR 1</ListGroup.Item>
-                <ListGroup.Item action>SENSOR 2</ListGroup.Item>
-                <ListGroup.Item action>SENSOR 3</ListGroup.Item>
+                {sensors.map((sensor, i) => (
+                  <ListGroup.Item
+                    key={i}
+                    style={{ textTransform: "capitalize" }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      <span
+                        onClick={() =>
+                          showMyLocation(sensor.latitude, sensor.longitude)
+                        }
+                        style={{
+                          cursor: "pointer",
+                          color:
+                            sensor.status == "free"
+                              ? "green"
+                              : sensor.status == "moderate"
+                              ? "yellow"
+                              : "red",
+                        }}
+                      >
+                        Sensor: {sensor.id.replace(/_/g, " ")}
+                      </span>
+                      <div
+                        style={{
+                          display: "flex",
+                        }}
+                      >
+                        <div
+                          style={{
+                            borderRadius: "100%",
+                            height: "20px",
+                            width: "20px",
+                            backgroundColor: "red",
+                            marginRight: "5px",
+                            cursor: "pointer",
+                          }}
+                          onClick={() => changeStatus("busy", sensor.id)}
+                        />
+                        <div
+                          style={{
+                            borderRadius: "100%",
+                            height: "20px",
+                            width: "20px",
+                            backgroundColor: "yellow",
+                            marginRight: "5px",
+                            cursor: "pointer",
+                          }}
+                          onClick={() => changeStatus("moderate", sensor.id)}
+                        />
+                        <div
+                          style={{
+                            borderRadius: "100%",
+                            height: "20px",
+                            width: "20px",
+                            backgroundColor: "green",
+                            cursor: "pointer",
+                          }}
+                          onClick={() => changeStatus("free", sensor.id)}
+                        />
+                      </div>
+                    </div>
+                  </ListGroup.Item>
+                ))}
               </ListGroup>
             </Offcanvas.Body>
           </Offcanvas>
@@ -178,6 +279,11 @@ export default function Map() {
           </Marker>
         ))}
       </MapContainer>
+
+      <ModalSensor
+        show={modalSensor}
+        fecharModal={() => setModalSensor(false)}
+      />
     </div>
   );
 }
