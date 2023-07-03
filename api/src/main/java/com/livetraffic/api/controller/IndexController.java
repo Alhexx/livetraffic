@@ -10,7 +10,7 @@ public class IndexController {
 
 	@GetMapping
 	public String get() {
-		return "Hello from LiveTraffic API!";
+		return "Hello from Joe's Traffic API!";
 	}
 
 }

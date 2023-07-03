@@ -3,6 +3,7 @@ package com.livetraffic.api.service;
 import java.util.function.Consumer;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import jakarta.annotation.PostConstruct;
 
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,8 +86,23 @@ public class SensorService {
 		}
 	}
 
+	@PostConstruct
+	private void initSampleSensors() {
+		create(genSensor("ayrton_senna_1","busy",-5.856663,-35.205747)).subscribe();
+		create(genSensor("roberto_freire_1","moderate",-5.863720,-35.188711)).subscribe();
+		create(genSensor("salgado_filho_1","moderate",-5.831813,-35.212114)).subscribe();
+		create(genSensor("salgado_filho_2","busy",-5.8446177955954415,-35.20879802146579)).subscribe();
+		create(genSensor("mauro_negocio_1","free",-5.795700921513827,-35.22335530301774)).subscribe();
+		create(genSensor("jose_bezarra_1","free",-5.804186678661092,-35.20936003253733)).subscribe();
+		create(genSensor("jaguarari_1","moderate",-5.834330924322511,-35.22414804351795)).subscribe();
+	}
+
+	private String genSensor(String id, String flow, Double x, Double y) {
+		return "{\"id\":\""+id+"\",\"type\":\"TrafficSensor\",\"flow\":{\"type\":\"Text\",\"value\":\""+flow+"\"},\"location\":{\"type\":\"geo:json\",\"value\":{\"type\":\"Point\",\"coordinates\":["+x+","+y+"]}}}";
+	}
+
 	private String subscriptionStr() {
-		return "{\"description\":\"Global TrafficSensor subscription\",\"subject\":{\"entities\":[{\"idPattern\":\".*\",\"type\":\"TrafficSensor\"}],\"condition\":{\"attrs\":[\"flow\",\"location\"]}},\"notification\":{\"http\":{\"url\":\"http://api:8080/sensors/events\"},\"attrs\":[]},\"throttling\":2}";
+		return "{\"description\":\"Global TrafficSensor subscription\",\"subject\":{\"entities\":[{\"idPattern\":\".*\",\"type\":\"TrafficSensor\"}],\"condition\":{\"attrs\":[\"flow\",\"location\"]}},\"notification\":{\"http\":{\"url\":\"http://api:8080/sensors/events\"},\"attrs\":[]},\"throttling\":1}";
 	}
 
 }
