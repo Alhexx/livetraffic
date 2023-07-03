@@ -29,5 +29,10 @@ services:
     ports:
       - "8080:8080"
 
+  front:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+
 volumes:
   mongodb-volume:
