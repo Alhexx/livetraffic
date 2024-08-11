@@ -4,7 +4,13 @@ import styles from "./style.module.scss";
 import api from "../../services/api";
 import React, { useEffect, useState, useRef } from "react";
 import { ListGroup, Offcanvas, Button, Col, Row } from "react-bootstrap";
-import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
+import {
+  MapContainer,
+  Marker,
+  Popup,
+  TileLayer,
+  useMapEvents,
+} from "react-leaflet";
 import { backend_url } from "../../../utils/conf";
 import ModalSensor from "../ModalSensor";
 
@@ -12,6 +18,8 @@ export default function Map() {
   const [isLoading, setIsLoading] = useState(false);
   const [show, setShow] = useState(false);
   const [modalSensor, setModalSensor] = useState(false);
+  const [coordinates, setCoordinates] = useState(null);
+  const [copied, setCopied] = useState(false);
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
@@ -19,6 +27,18 @@ export default function Map() {
   const [sensors, setSensors] = useState([]);
 
   const mapRef = useRef();
+
+  const MapClickHandler = () => {
+    useMapEvents({
+      click: (e) => {
+        const lat = e.latlng.lat;
+        const lng = e.latlng.lng;
+        console.log({ lat, lng });
+        setCoordinates({ lat, lng });
+        setCopied(false);
+      },
+    });
+  };
 
   const showMyLocation = (lat, long) => {
     const map = mapRef.current;
@@ -122,7 +142,7 @@ export default function Map() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.contact}>
+      <div className={styles.sensors_button}>
         <div id="contact-form-overlay-mini">
           <Button variant="dark" onClick={handleShow}>
             Sensors
@@ -226,16 +246,22 @@ export default function Map() {
           </Offcanvas>
         </div>
       </div>
+      <div className={styles.coordinates}>
+        <p className={styles.coordinates_text}>
+          Coordenadas selecionadas: {coordinates?.lat}, {coordinates?.lng}
+        </p>
+      </div>
       <MapContainer
         center={[-5.832430084556201, -35.205416846609594]}
         zoom={15}
-        style={{ height: "77vh", width: "100%" }}
+        style={{ height: "86vh", width: "100%" }}
         ref={mapRef}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+        <MapClickHandler />
         {sensors.map((sensor, i) => (
           <Marker
             key={i}

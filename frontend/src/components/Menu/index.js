@@ -9,12 +9,7 @@ export function Menu() {
     <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark">
       <Container>
         <Navbar.Brand onClick={() => Router.push("/")} as="a">
-          <Image
-            src="/joe.png"
-            alt={"joe-logo"}
-            height={100}
-            width={120}
-          ></Image>
+          <Image src="/joe.png" alt={"joe-logo"} height={40} width={60}></Image>
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="responsive-navbar-nav" />
 

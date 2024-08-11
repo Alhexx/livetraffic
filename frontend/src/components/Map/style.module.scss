@@ -2,7 +2,7 @@
   position: relative;
 }
 
-.contact {
+.sensors_button {
   position: absolute;
   top: 20px;
   right: 20px;
@@ -10,4 +10,21 @@
   border-radius: 4px;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
   float: right;
+}
+
+.coordinates {
+  background-color: rgba(63, 63, 63, 0.4);
+  backdrop-filter: blur(3px);
+  position: absolute;
+  width: 100%;
+
+  bottom: 0;
+  z-index: 999;
+  color: white;
+}
+
+.coordinates_text {
+  margin-left: 10px;
+  margin-bottom: 0;
+  font-size: 12px;
 }
